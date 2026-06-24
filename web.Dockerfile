@@ -1,6 +1,6 @@
 # ── Stage 1 : Build ───────────────────────────────────────────────────────────
 # Build context : racine du projet
-# docker build -f infrastructure/web/Dockerfile .
+# docker build -f web.Dockerfile .
 FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-25 AS builder
 
 WORKDIR /app
