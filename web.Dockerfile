@@ -43,7 +43,7 @@ COPY infrastructure/web/src                     infrastructure/web/src
 RUN --mount=type=cache,target=/root/.m2 \
     mvn install -DskipTests -q -pl infrastructure/web --also-make && \
     mvn dependency:copy-dependencies \
-      -DoutputDirectory=infrastructure/web/target/deps \
+      -DoutputDirectory=target/deps \
       -pl infrastructure/web -q
 
 # ── Stage 2 : OTel Java agent ─────────────────────────────────────────────────
