@@ -9,24 +9,33 @@ WORKDIR /app
 # de résolution des dépendances — elle ne se recharge que si un pom.xml change
 COPY pom.xml                                    .
 COPY domain/pom.xml                             domain/
+COPY domain/shared/pom.xml                      domain/shared/
 COPY domain/bank-account/pom.xml                domain/bank-account/
+COPY domain/identity/pom.xml                    domain/identity/
+COPY domain/payee/pom.xml                       domain/payee/
 COPY domain/transaction/pom.xml                 domain/transaction/
-COPY domain/imputation-account/pom.xml          domain/imputation-account/
 COPY application/pom.xml                        application/
 COPY infrastructure/pom.xml                     infrastructure/
 COPY infrastructure/web/pom.xml                 infrastructure/web/
+COPY infrastructure/hashing/pom.xml             infrastructure/hashing/
 COPY infrastructure/persistence/pom.xml         infrastructure/persistence/
 COPY infrastructure/tasks/pom.xml               infrastructure/tasks/
+COPY infrastructure/xlsx/pom.xml                infrastructure/xlsx/
 
 RUN --mount=type=cache,target=/root/.m2 \
     mvn dependency:go-offline -q
 
 # Seules les sources dont le module web dépend sont copiées (--also-make)
-# persistence et tasks sont exclus : un changement là ne rebuild pas l'image web
+# tasks est exclu : non dépendance de web, un changement là ne rebuild pas l'image
+COPY domain/shared/src                          domain/shared/src
 COPY domain/bank-account/src                    domain/bank-account/src
+COPY domain/identity/src                        domain/identity/src
+COPY domain/payee/src                           domain/payee/src
 COPY domain/transaction/src                     domain/transaction/src
-COPY domain/imputation-account/src              domain/imputation-account/src
 COPY application/src                            application/src
+COPY infrastructure/hashing/src                 infrastructure/hashing/src
+COPY infrastructure/persistence/src             infrastructure/persistence/src
+COPY infrastructure/xlsx/src                    infrastructure/xlsx/src
 COPY infrastructure/web/src                     infrastructure/web/src
 
 # install (et non package) pour que les modules internes soient disponibles
