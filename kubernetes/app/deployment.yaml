@@ -13,6 +13,46 @@ spec:
       labels:
         app: finance
     spec:
+      initContainers:
+        - name: mongodb-setup
+          image: mongo:8.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until mongosh --host mongodb --quiet --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+                sleep 2
+              done
+              mongosh "mongodb://$MONGO_ROOT_USERNAME:$MONGO_ROOT_PASSWORD@mongodb:27017/admin" --quiet --eval "
+                const d = db.getSiblingDB('finance');
+                if (!d.getUser(process.env.MONGO_APP_USERNAME)) {
+                  d.createUser({
+                    user: process.env.MONGO_APP_USERNAME,
+                    pwd: process.env.MONGO_APP_PASSWORD,
+                    roles: [{ role: 'readWrite', db: 'finance' }]
+                  });
+                }
+              "
+          env:
+            - name: MONGO_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: root-username
+            - name: MONGO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: root-password
+            - name: MONGO_APP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: app-username
+            - name: MONGO_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: app-password
       containers:
         - name: finance
           image: ghcr.io/noynto/finance:latest
