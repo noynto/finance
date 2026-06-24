@@ -42,7 +42,7 @@ public class Payee {
     }
 
     public List<TransactionId> getTransactionIds() {
-        if (transactionIds == null) return List.of();
+        if (transactionIds == null) transactionIds = new ArrayList<>();
         return transactionIds;
     }
 
