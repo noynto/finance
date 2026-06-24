@@ -67,8 +67,8 @@ COPY --from=otel-agent /otel-javaagent.jar                                      
 # ── Variables d'environnement ─────────────────────────────────────────────────
 
 # [OBLIGATOIRE] URI de connexion MongoDB
-# Exemple : mongodb://user:password@host:27017/finance
-ENV MONGO_URI=""
+# Exemple : mongodb://user:password@host:27017/?authSource=admin
+ENV FINANCE_MONGODB_URI=""
 
 # Port d'écoute du serveur HTTP (défaut : 8080)
 ENV FINANCE_SERVER_PORT="8080"
