@@ -1,0 +1,13 @@
+services:
+  persistence:
+    image: mongo:8.0
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${FINANCE_MONGODB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${FINANCE_MONGODB_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

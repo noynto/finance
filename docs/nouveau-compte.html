@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nouveau compte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #2d353b;
+    --bg-elevated: #343f44;
+    --bg-elevated-2: #3d484d;
+    --bg-hover: #475258;
+    --border: #475258;
+    --border-strong: #56635f;
+
+    --fg: #d3c6aa;
+    --fg-dim: #9da9a0;
+    --fg-faint: #7a8478;
+
+    --accent: #a7c080;
+    --accent-strong: #8fad6f;
+    --accent-soft: rgba(167, 192, 128, 0.12);
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 16px;
+
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.24);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding: 16px 12px 48px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .page { max-width: 480px; width: 100%; margin: 0 auto; }
+
+  /* Top nav */
+  .topbar { display: flex; align-items: center; margin-bottom: 20px; margin-left: -8px; }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding: 10px 14px 10px 8px;
+    border-radius: 8px;
+    min-height: 40px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .back-link:hover, .back-link:active { background: var(--bg-elevated); color: var(--fg); }
+  .back-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .header { margin-bottom: 24px; padding: 0 4px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--fg-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  h1 { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .subtitle { font-size: 13.5px; color: var(--fg-dim); line-height: 1.5; }
+
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 20px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Field */
+  .field { margin-bottom: 24px; }
+  .field-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 9px;
+  }
+  .field-hint {
+    font-size: 12px;
+    color: var(--fg-faint);
+    margin-top: 7px;
+  }
+
+  .text-input {
+    width: 100%;
+    background: var(--bg-elevated-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 14px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--fg);
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .text-input::placeholder { color: var(--fg-faint); }
+  .text-input:focus { border-color: var(--accent); background: var(--bg-elevated); }
+
+  /* Color picker */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+  }
+  .color-swatch {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .color-swatch:hover { transform: scale(1.08); }
+  .color-swatch:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+  .color-swatch .check {
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    color: rgba(0,0,0,0.55);
+  }
+  .color-swatch.selected {
+    box-shadow: 0 0 0 2px var(--bg-elevated), 0 0 0 4px currentColor;
+  }
+  .color-swatch.selected .check { opacity: 1; transform: scale(1); }
+
+  /* Submit */
+  .submit-row { margin-top: 28px; }
+  .btn-primary {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--accent);
+    border: none;
+    padding: 14px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-strong); }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { background: var(--bg-hover); color: var(--fg-faint); cursor: not-allowed; }
+  .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (min-width: 480px) {
+    body { padding: 24px 16px 60px; align-items: center; min-height: 100vh; }
+    .topbar { margin-bottom: 28px; }
+    h1 { font-size: 24px; }
+    .card { padding: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="topbar">
+    <a href="dashboard.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Tableau de bord
+    </a>
+  </div>
+
+  <div class="header">
+    <div class="eyebrow">Compte · Nouveau</div>
+    <h1>Créer un compte</h1>
+    <p class="subtitle">Un compte regroupe les opérations qui s'y rapportent — abonnement, commerçant, type de dépense...</p>
+  </div>
+
+  <div class="card">
+    <form id="accountForm">
+      <div class="field">
+        <label class="field-label" for="accountName">Nom</label>
+        <input
+          type="text"
+          id="accountName"
+          class="text-input"
+          placeholder="Ex. Boulangerie, Netflix, Assurance auto…"
+          autocomplete="off"
+          maxlength="40"
+        >
+      </div>
+
+      <div class="field">
+        <span class="field-label">Couleur</span>
+        <div class="color-grid" role="radiogroup" aria-label="Choisir une couleur">
+          <button type="button" class="color-swatch selected" style="background:#a7c080; color:#a7c080;" role="radio" aria-checked="true" aria-label="Vert" data-color="#a7c080">
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button type="button" class="color-swatch" style="background:#7fbbb3; color:#7fbbb3;" role="radio" aria-checked="false" aria-label="Bleu" data-color="#7fbbb3">
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button type="button" class="color-swatch" style="background:#dbbc7f; color:#dbbc7f;" role="radio" aria-checked="false" aria-label="Jaune" data-color="#dbbc7f">
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button type="button" class="color-swatch" style="background:#e69875; color:#e69875;" role="radio" aria-checked="false" aria-label="Orange" data-color="#e69875">
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button type="button" class="color-swatch" style="background:#e67e80; color:#e67e80;" role="radio" aria-checked="false" aria-label="Rouge" data-color="#e67e80">
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button type="button" class="color-swatch" style="background:#d699b6; color:#d699b6;" role="radio" aria-checked="false" aria-label="Rose" data-color="#d699b6">
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+        <p class="field-hint">Utilisée pour repérer le compte dans les listes.</p>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn-primary" id="submitBtn" disabled>
+          Créer le compte
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const nameInput = document.getElementById('accountName');
+  const submitBtn = document.getElementById('submitBtn');
+  const swatches = document.querySelectorAll('.color-swatch');
+
+  function updateSubmitState() {
+    submitBtn.disabled = nameInput.value.trim().length === 0;
+  }
+
+  nameInput.addEventListener('input', updateSubmitState);
+
+  swatches.forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      swatches.forEach(s => {
+        s.classList.remove('selected');
+        s.setAttribute('aria-checked', 'false');
+      });
+      swatch.classList.add('selected');
+      swatch.setAttribute('aria-checked', 'true');
+    });
+  });
+
+  document.getElementById('accountForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    // À connecter : création du compte puis redirection
+  });
+
+  updateSubmitState();
+</script>
+
+</body>
+</html>

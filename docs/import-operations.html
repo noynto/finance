@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Importer des opérations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* === Everforest Dark Soft — design tokens === */
+    --bg: #2d353b;
+    --bg-elevated: #343f44;
+    --bg-elevated-2: #3d484d;
+    --bg-hover: #475258;
+    --border: #475258;
+    --border-strong: #56635f;
+
+    --fg: #d3c6aa;
+    --fg-dim: #9da9a0;
+    --fg-faint: #7a8478;
+
+    --accent: #a7c080;       /* vert — succès, action primaire */
+    --accent-strong: #8fad6f;
+    --accent-soft: rgba(167, 192, 128, 0.12);
+
+    --info: #7fbbb3;         /* bleu — info */
+    --info-soft: rgba(127, 187, 179, 0.12);
+
+    --warn: #dbbc7f;         /* jaune — attention */
+    --warn-soft: rgba(219, 188, 127, 0.12);
+
+    --danger: #e67e80;       /* rouge — erreur */
+    --danger-soft: rgba(230, 126, 128, 0.12);
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 16px;
+
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.24);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(167, 192, 128, 0.05), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(127, 187, 179, 0.04), transparent 40%);
+  }
+
+  .screen {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* Header */
+  .header { margin-bottom: 32px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: var(--fg-dim);
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+
+  /* Card */
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Step label */
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .step-index {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--bg);
+    background: var(--accent);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .step-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Account list — grouped by bank */
+  .account-list { margin-bottom: 28px; }
+
+  .bank-group { margin-bottom: 16px; }
+  .bank-group:last-child { margin-bottom: 0; }
+
+  .bank-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px;
+    margin-bottom: 8px;
+  }
+  .bank-group-logo {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 9px;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+  .bank-group-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .account-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: var(--bg-elevated-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    text-align: left;
+    margin-bottom: 8px;
+  }
+  .account-option:last-child { margin-bottom: 0; }
+  .account-option:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+  .account-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .account-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+  .account-radio {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    flex-shrink: 0;
+    position: relative;
+    transition: border-color 0.15s ease;
+  }
+  .account-option.selected .account-radio { border-color: var(--accent); }
+  .account-option.selected .account-radio::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .account-option-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+  .account-option.selected .account-option-name { color: var(--fg); }
+
+  .account-color-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Empty state — no bank account yet */
+  .empty-state {
+    text-align: center;
+    padding: 36px 20px;
+    background: var(--bg-elevated-2);
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    margin-bottom: 28px;
+  }
+  .empty-state-icon {
+    width: 44px; height: 44px;
+    margin: 0 auto 14px;
+    border-radius: var(--radius);
+    background: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg-faint);
+  }
+  .empty-state-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 4px;
+  }
+  .empty-state-sub {
+    font-size: 12.5px;
+    color: var(--fg-faint);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+  .empty-state-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--accent);
+    border: none;
+    padding: 11px 18px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .empty-state-cta:hover { background: var(--accent-strong); }
+  .empty-state-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .step-add-link {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--info);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .step-add-link:hover { text-decoration: underline; }
+
+  /* Dropzone (no drag&drop — click to browse) */
+  .dropzone {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    background: var(--bg-elevated-2);
+  }
+  .dropzone:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .dropzone-icon {
+    width: 44px; height: 44px;
+    margin: 0 auto 14px;
+    border-radius: var(--radius);
+    background: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dropzone-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 4px;
+  }
+  .dropzone-hint {
+    font-size: 12.5px;
+    color: var(--fg-faint);
+  }
+  .dropzone-hint .browse {
+    color: var(--info);
+    font-weight: 500;
+  }
+  input[type="file"] { display: none; }
+
+  /* Selected file state */
+  .file-chip {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-top: 12px;
+  }
+  .file-chip.visible { display: flex; }
+  .file-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .file-meta { flex: 1; min-width: 0; }
+  .file-name {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .file-size {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--fg-faint);
+  }
+  .file-remove {
+    background: none;
+    border: none;
+    color: var(--fg-faint);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    display: flex;
+  }
+  .file-remove:hover { color: var(--danger); background: var(--danger-soft); }
+
+  /* Submit */
+  .submit-row {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .helper-text {
+    font-size: 12px;
+    color: var(--fg-faint);
+    line-height: 1.5;
+  }
+  .btn-primary {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--accent);
+    border: none;
+    padding: 12px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-strong); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled {
+    background: var(--bg-hover);
+    color: var(--fg-faint);
+    cursor: not-allowed;
+  }
+  .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  @media (max-width: 480px) {
+    .submit-row { flex-direction: column; align-items: stretch; }
+    .btn-primary { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen">
+  <div class="header">
+    <div class="eyebrow">Opérations · Import</div>
+    <h1>Importer un relevé</h1>
+    <p class="subtitle">Sélectionnez le compte bancaire concerné puis le fichier XLSX exporté. L'import est automatique — vous serez redirigé vers le tableau de bord une fois terminé.</p>
+  </div>
+
+  <div class="card">
+    <!-- Step 1 — Bank account -->
+    <div class="step">
+      <span class="step-index">1</span>
+      <span class="step-label">Compte bancaire</span>
+      <a href="nouveau-compte-bancaire.html" class="step-add-link">
+        + Ajouter
+      </a>
+    </div>
+
+    <div class="account-list" role="radiogroup" aria-label="Choisir un compte bancaire">
+      <div class="bank-group">
+        <div class="bank-group-header">
+          <div class="bank-group-logo" style="background:#7fbbb3;">BP</div>
+          <span class="bank-group-name">BoursoBank</span>
+        </div>
+        <button type="button" class="account-option selected" role="radio" aria-checked="true">
+          <span class="account-radio"></span>
+          <span class="account-option-name">Courant</span>
+          <span class="account-color-dot" style="background:#a7c080;"></span>
+        </button>
+        <button type="button" class="account-option" role="radio" aria-checked="false">
+          <span class="account-radio"></span>
+          <span class="account-option-name">Livret A</span>
+          <span class="account-color-dot" style="background:#dbbc7f;"></span>
+        </button>
+      </div>
+
+      <div class="bank-group">
+        <div class="bank-group-header">
+          <div class="bank-group-logo" style="background:#e67e80;">CA</div>
+          <span class="bank-group-name">Crédit Agricole</span>
+        </div>
+        <button type="button" class="account-option" role="radio" aria-checked="false">
+          <span class="account-radio"></span>
+          <span class="account-option-name">Compte joint</span>
+          <span class="account-color-dot" style="background:#7fbbb3;"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- État vide — décommenter si aucun compte bancaire n'existe, et masquer .account-list + step 2 + submit-row
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <div class="empty-state-title">Aucun compte bancaire</div>
+      <div class="empty-state-sub">Créez d'abord un compte bancaire pour pouvoir y importer vos opérations.</div>
+      <a href="nouveau-compte-bancaire.html" class="empty-state-cta">
+        Créer un compte bancaire
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+    </div>
+    -->
+
+    <!-- Step 2 — File -->
+    <div class="step">
+      <span class="step-index">2</span>
+      <span class="step-label">Le fichier</span>
+    </div>
+
+    <label class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept=".xlsx">
+      <div class="dropzone-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a7c080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <polyline points="9 15 12 12 15 15"/>
+        </svg>
+      </div>
+      <div class="dropzone-title">Sélectionner le relevé</div>
+      <div class="dropzone-hint">Format <strong>.xlsx</strong> uniquement — <span class="browse">parcourir les fichiers</span></div>
+    </label>
+
+    <div class="file-chip" id="fileChip">
+      <div class="file-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      <div class="file-meta">
+        <div class="file-name" id="fileName">—</div>
+        <div class="file-size" id="fileSize">—</div>
+      </div>
+      <button class="file-remove" id="fileRemove" aria-label="Retirer le fichier">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="submit-row">
+      <p class="helper-text">Les opérations en double<br>seront automatiquement ignorées.</p>
+      <button class="btn-primary" id="submitBtn" disabled>
+        Importer
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Bank account selection
+  document.querySelectorAll('.account-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.account-option').forEach(o => {
+        o.classList.remove('selected');
+        o.setAttribute('aria-checked', 'false');
+      });
+      opt.classList.add('selected');
+      opt.setAttribute('aria-checked', 'true');
+    });
+  });
+
+  // File selection (click to browse, no drag&drop)
+  const fileInput = document.getElementById('fileInput');
+  const fileChip = document.getElementById('fileChip');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const submitBtn = document.getElementById('submitBtn');
+  const fileRemove = document.getElementById('fileRemove');
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' o';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Ko';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' Mo';
+  }
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) {
+      fileName.textContent = file.name;
+      fileSize.textContent = formatSize(file.size);
+      fileChip.classList.add('visible');
+      submitBtn.disabled = false;
+    }
+  });
+
+  fileRemove.addEventListener('click', (e) => {
+    e.preventDefault();
+    fileInput.value = '';
+    fileChip.classList.remove('visible');
+    submitBtn.disabled = true;
+  });
+</script>
+
+</body>
+</html>

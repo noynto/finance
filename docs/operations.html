@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opérations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #2d353b;
+    --bg-elevated: #343f44;
+    --bg-elevated-2: #3d484d;
+    --bg-hover: #475258;
+    --border: #475258;
+
+    --fg: #d3c6aa;
+    --fg-dim: #9da9a0;
+    --fg-faint: #7a8478;
+
+    --accent: #a7c080;
+    --accent-soft: rgba(167, 192, 128, 0.12);
+
+    --positive: #a7c080;
+    --positive-soft: rgba(167, 192, 128, 0.1);
+    --negative: #e67e80;
+    --negative-soft: rgba(230, 126, 128, 0.1);
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    /* mobile-first padding, generous side margins come back on larger screens */
+    padding: 16px 12px 48px;
+  }
+
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  /* Top nav */
+  .topbar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    /* negative margin so the touch target's padding doesn't push content in */
+    margin-left: -8px;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding: 10px 14px 10px 8px;
+    border-radius: 8px;
+    min-height: 40px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .back-link:hover, .back-link:active {
+    background: var(--bg-elevated);
+    color: var(--fg);
+  }
+  .back-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .header {
+    margin-bottom: 20px;
+    padding: 0 4px;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--fg-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  /* Month group */
+  .month-group { margin-bottom: 20px; }
+
+  .month-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    margin-bottom: 2px;
+    border-radius: 8px;
+    position: sticky;
+    top: 0;
+    background: var(--bg-elevated);
+    z-index: 2;
+    /* small breathing edge so sticky header doesn't look glued to viewport edge */
+    box-shadow: 0 1px 0 var(--bg);
+  }
+  .month-name {
+    font-family: var(--font-display);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--fg);
+    text-transform: capitalize;
+    white-space: nowrap;
+  }
+  .month-total {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .month-total.positive { color: var(--positive); }
+  .month-total.negative { color: var(--negative); }
+
+  /* Operation row — stacked on mobile: label on top, date+amount below */
+  .op-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    min-height: 44px; /* touch target */
+    justify-content: center;
+    border-bottom: 1px solid rgba(71, 82, 88, 0.4);
+    transition: background 0.12s ease;
+  }
+  .op-row:active { background: var(--bg-elevated); }
+  .op-row:last-child { border-bottom: none; }
+
+  .op-label {
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .op-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .op-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-faint);
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+  }
+  .op-date .weekday {
+    text-transform: capitalize;
+  }
+  .op-date .day {
+    color: var(--fg-dim);
+    font-weight: 500;
+  }
+
+  .op-amount {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    padding: 3px 9px;
+    border-radius: 6px;
+  }
+  .op-amount.positive {
+    color: var(--positive);
+    background: var(--positive-soft);
+  }
+  .op-amount.negative {
+    color: var(--negative);
+    background: var(--negative-soft);
+  }
+
+  /* ≥480px: switch to a single row — date · label · amount side by side */
+  @media (min-width: 480px) {
+    body { padding: 24px 16px 60px; }
+
+    .topbar { margin-bottom: 28px; }
+    .header { margin-bottom: 28px; }
+    h1 { font-size: 26px; }
+    .eyebrow { font-size: 12px; margin-bottom: 10px; }
+
+    .month-header {
+      background: var(--bg);
+      box-shadow: none;
+      padding: 0 4px 10px;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+    }
+    .month-name { font-size: 14.5px; }
+
+    .op-row {
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 4px;
+      min-height: 0;
+    }
+    .op-row:hover {
+      background: var(--bg-elevated);
+      border-radius: 8px;
+    }
+
+    .op-date {
+      width: 38px;
+      flex-direction: column;
+      flex-shrink: 0;
+      text-align: center;
+      line-height: 1.3;
+      gap: 0;
+      order: 1;
+    }
+    .op-date .day { display: block; font-size: 15px; }
+    .op-date .weekday {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .op-label {
+      flex: 1;
+      min-width: 0;
+      font-size: 14px;
+      font-weight: 450;
+      order: 2;
+    }
+
+    .op-meta {
+      display: contents; /* unwrap so date/amount can take their order position */
+    }
+
+    .op-amount { font-size: 14px; order: 3; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="topbar">
+    <a href="dashboard.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Tableau de bord
+    </a>
+  </div>
+
+  <div class="header">
+    <div class="eyebrow">248 opérations</div>
+    <h1>Opérations</h1>
+  </div>
+
+  <!-- Juin 2026 -->
+  <div class="month-group">
+    <div class="month-header">
+      <span class="month-name">Juin 2026</span>
+      <span class="month-total negative">−842,10 €</span>
+    </div>
+
+    <div class="op-row">
+      <div class="op-label">Loyer appartement</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">jeu</span><span class="day">18</span></div>
+        <div class="op-amount negative">−750,00 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Virement salaire</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">lun</span><span class="day">15</span></div>
+        <div class="op-amount positive">+2 400,00 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Carrefour Market</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">ven</span><span class="day">12</span></div>
+        <div class="op-amount negative">−64,32 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Netflix.com</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">mer</span><span class="day">10</span></div>
+        <div class="op-amount negative">−15,99 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Assurance habitation MAIF</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">mer</span><span class="day">03</span></div>
+        <div class="op-amount negative">−28,40 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">SNCF Connect</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">mar</span><span class="day">02</span></div>
+        <div class="op-amount negative">−87,00 €</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mai 2026 -->
+  <div class="month-group">
+    <div class="month-header">
+      <span class="month-name">Mai 2026</span>
+      <span class="month-total positive">+1 612,50 €</span>
+    </div>
+
+    <div class="op-row">
+      <div class="op-label">Pharmacie du Centre</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">dim</span><span class="day">31</span></div>
+        <div class="op-amount negative">−22,80 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Restaurant Le Faubourg</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">jeu</span><span class="day">28</span></div>
+        <div class="op-amount negative">−54,00 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Virement salaire</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">ven</span><span class="day">15</span></div>
+        <div class="op-amount positive">+2 400,00 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Netflix.com</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">dim</span><span class="day">10</span></div>
+        <div class="op-amount negative">−15,99 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Assurance habitation MAIF</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">dim</span><span class="day">03</span></div>
+        <div class="op-amount negative">−28,40 €</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avril 2026 -->
+  <div class="month-group">
+    <div class="month-header">
+      <span class="month-name">Avril 2026</span>
+      <span class="month-total positive">+1 489,20 €</span>
+    </div>
+
+    <div class="op-row">
+      <div class="op-label">Amazon EU</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">mer</span><span class="day">22</span></div>
+        <div class="op-amount negative">−43,18 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Virement salaire</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">mer</span><span class="day">15</span></div>
+        <div class="op-amount positive">+2 400,00 €</div>
+      </div>
+    </div>
+    <div class="op-row">
+      <div class="op-label">Assurance habitation MAIF</div>
+      <div class="op-meta">
+        <div class="op-date"><span class="weekday">ven</span><span class="day">03</span></div>
+        <div class="op-amount negative">−28,40 €</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
