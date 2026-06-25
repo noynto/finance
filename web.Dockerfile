@@ -93,8 +93,9 @@ EXPOSE 8080
 ENTRYPOINT ["java", \
   "-javaagent:otel-javaagent.jar", \
   "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-XX:+UseZGC", \
-  "-XX:+ZGenerational", \
+  "-XX:MaxRAMPercentage=45.0", \
+  "-XX:+UseG1GC", \
+  "-XX:MetaspaceSize=32m", \
+  "-XX:MaxMetaspaceSize=96m", \
   "-cp", "app.jar:deps/*", \
   "me.noynto.finance.infrastructure.web.Web"]
