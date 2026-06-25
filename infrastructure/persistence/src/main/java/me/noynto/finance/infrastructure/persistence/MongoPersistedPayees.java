@@ -10,6 +10,7 @@ import me.noynto.finance.domain.shared.PayeeId;
 import me.noynto.finance.domain.shared.TransactionId;
 import org.bson.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -74,12 +75,12 @@ public record MongoPersistedPayees(
         var ownerIdentityId = new IdentityId();
         ownerIdentityId.setValue(doc.getString("ownerIdentityId"));
 
-        var txIds = doc.getList("transactionIds", String.class, List.of())
+        var txIds = new ArrayList<>(doc.getList("transactionIds", String.class, List.of())
                 .stream().map(v -> {
                     var txId = new TransactionId();
                     txId.setValue(v);
                     return txId;
-                }).toList();
+                }).toList());
 
         var payee = new Payee();
         payee.setId(id);
