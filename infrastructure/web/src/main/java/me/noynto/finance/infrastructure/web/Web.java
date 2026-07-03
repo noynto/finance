@@ -115,7 +115,7 @@ public class Web {
                     );
                     config.routes.before(ctx -> {
                         var path = ctx.path();
-                        if (path.startsWith("/sign-in") || path.startsWith("/sign-up") || path.endsWith(".js") || path.endsWith(".css") || path.endsWith(".ico")) return;
+                        if (path.startsWith("/sign-in") || path.startsWith("/sign-up") || path.endsWith(".js") || path.endsWith(".css") || path.endsWith(".ico") || path.endsWith(".svg") || path.endsWith(".png") || path.equals("/manifest.json")) return;
                         var cookieValue = ctx.cookie("identity-session-id");
                         if (cookieValue == null || cookieValue.isBlank()) {
                             ctx.redirect("/sign-in");

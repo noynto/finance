@@ -3,6 +3,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .kotlin
+jte-classes/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -35,6 +36,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Zed ###
+.zed/
 
 ### Mac OS ###
 .DS_Store
